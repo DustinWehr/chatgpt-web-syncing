@@ -368,10 +368,8 @@ const setBooleanOption = (option_name: keyof GlobalSettings) => {
           <article id='sync-troubleshooting-section' class="message-body">
 
             <p>Please report any bugs with sync! But for immediate relief, you can try these buttons.</p>
-
-          <!-- <span class="control"> -->
+          
             <p><b>These won't delete any of the chats on your devices:</b></p>
-
 
             <!-- Clear remoteStorage button -->
             <button class="button is-info"
@@ -393,8 +391,6 @@ const setBooleanOption = (option_name: keyof GlobalSettings) => {
               Clear remote sync data 
               <span id="clearing-progress-display"></span>
             </button>
-
-
 
             <!-- Reset local sync bookkeeping button -->
             <button class="button is-info"
@@ -426,10 +422,6 @@ const setBooleanOption = (option_name: keyof GlobalSettings) => {
             >Delete corrupt local chats</button>
 
             {/if}
-
-          <!-- </span> -->
-
-
         </article>
 
         <label class="label" for="syncDebugModeCheckbox">
@@ -438,13 +430,6 @@ const setBooleanOption = (option_name: keyof GlobalSettings) => {
                   on:click={setBooleanOption('syncDebugMode')}/>
           Verbose logging and extra troubleshooting buttons.
         </label>
-
-        <!-- <label class="label" for="syncCacheEnabledCheckbox">
-          <input type="checkbox" class="checkbox" id="syncCacheEnabledCheckbox"
-                  checked={getGlobalSettings().syncCacheEnabled}
-                  on:click={setBooleanOption('syncCacheEnabled')}/>
-          rs cache...
-        </label> -->
       {/if}
     {/if}
   </div>

@@ -166,7 +166,6 @@ export type GlobalSettings = {
     enableSyncFeature: boolean;
     autosyncAfterLocalChange: boolean;
     syncDebugMode: boolean;
-    syncCacheEnabled: boolean;
     // These two are not meant to be included in the sync feature PR. I have them here because I use them daily, and would like to keep dogfooding the sync feature.
     multipleNewChatButtons: boolean;
     autoSummarize: boolean;

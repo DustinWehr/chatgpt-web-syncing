@@ -141,8 +141,7 @@ export const globalDefaults: GlobalSettings = {
   autoSummarize: false,
   enableSyncFeature: false,
   autosyncAfterLocalChange: false,
-  syncDebugMode: false,
-  syncCacheEnabled: false
+  syncDebugMode: false
 }
 
 const excludeFromProfile = {
@@ -742,12 +741,7 @@ const globalSettingsList:GlobalSetting[] = [
         key: 'syncDebugMode',
         name: 'Verbose logging and more/riskier options for fixing sync issues.',
         type: 'boolean'
-      },
-      {
-        key: 'syncCacheEnabled',
-        name: 'Experimental: use RemoteStorage background syncing.',
-        type: 'boolean'
-      },
+      },      
       {
         key: 'autosyncAfterLocalChange',
         name: 'When sync feature enabled, do a sync immediately after every change you make.',

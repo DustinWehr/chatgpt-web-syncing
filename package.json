@@ -1,6 +1,3 @@
-// NOTE I (Dustin) have not reviewed the changes to this file.
-// I'm not a frequent web developer. I don't even know why it's tracked in git. 
-
 {
   "name": "chatgpt-web",
   "private": true,

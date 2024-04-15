@@ -67,7 +67,7 @@
         //dw: disabled caching (i.e. background syncing) because under some unknown conditions it used localStorage 
         // automatically rather than IndexedDB, which breaks the app when the user has a lot of chats by
         // putting another copy of the chat data in localStorage.
-        cache: getGlobalSettings().syncCacheEnabled,
+        cache: false,
         changeEvents: {
           remote:   true,
           local:    false,
