@@ -1,3 +1,16 @@
+Adds end-to-end encrypted syncing of chats between devices to https://github.com/Niek/chatgpt-web, using [RemoteStorage](https://remotestoragejs.readthedocs.io/en/latest/) (via e.g. [5APPS](https://5apps.com/storage)) or Dropbox.
+
+**_URL for deploy of this fork_**: <https://chatgptweb-dust.vercel.app/>
+
+Some documentation can be found at
+- the app's main/settings page (source in `Home.svelte`)
+- [the upstream issue](https://github.com/Niek/chatgpt-web/issues/364)
+- [these comments](https://github.com/DustinWehr/chatgpt-web-syncing/blob/main/src/lib/sync/SyncFeatureAPI.svelte)
+
+**_UPSTREAM'S UNMODIFIED README FOLLOWS_**
+
+-----------------------
+
 # ChatGPT-web
 
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Niek/chatgpt-web/pages.yml?style=flat-square)](https://github.com/Niek/chatgpt-web/actions/workflows/pages.yml)
