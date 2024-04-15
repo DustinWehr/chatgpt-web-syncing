@@ -742,3 +742,20 @@ aside.menu.main-menu .menu-expanse {
 .modal.chat-settings .field-body {
   max-width: calc(100% - 40px);
 }
+
+#sync-code-display:hover {
+  opacity: 1;
+}
+
+#sync-code-display {
+  display: inline;
+  opacity: 0;
+}
+
+#sync-code-display-parent {
+  border-style:solid;
+}
+
+#clearing-progress-display {
+  color: yellow;
+}

@@ -136,7 +136,13 @@ export const globalDefaults: GlobalSettings = {
   chatSort: 'created',
   openAICompletionEndpoint: '',
   enablePetals: false,
-  pedalsEndpoint: ''
+  pedalsEndpoint: '',
+  multipleNewChatButtons: false,
+  autoSummarize: false,
+  enableSyncFeature: false,
+  autosyncAfterLocalChange: false,
+  syncDebugMode: false,
+  syncCacheEnabled: false
 }
 
 const excludeFromProfile = {
@@ -721,6 +727,36 @@ const globalSettingsList:GlobalSetting[] = [
         key: 'pedalsEndpoint',
         name: 'Petals API Endpoint',
         type: 'text'
+      },
+      {
+        key: 'multipleNewChatButtons',
+        name: 'Replace "New Chat" button with four buttons for CheapGPT3.5 (S3), CheapGPT4 (S4), GPT3.5 (L3), GPT4 (L4)',
+        type: 'boolean'
+      },
+      {
+        key: 'autoSummarize',
+        name: 'Do an API call to make a summary of the chat after the first two chat messages.',
+        type: 'boolean'
+      },
+      {
+        key: 'syncDebugMode',
+        name: 'Verbose logging and more/riskier options for fixing sync issues.',
+        type: 'boolean'
+      },
+      {
+        key: 'syncCacheEnabled',
+        name: 'Experimental: use RemoteStorage background syncing.',
+        type: 'boolean'
+      },
+      {
+        key: 'autosyncAfterLocalChange',
+        name: 'When sync feature enabled, do a sync immediately after every change you make.',
+        type: 'boolean'
+      },
+      {
+        key: 'enableSyncFeature',
+        name: 'Enable feature to sync chats via remoteStorage',
+        type: 'boolean'
       }
 ]
 

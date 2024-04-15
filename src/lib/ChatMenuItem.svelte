@@ -43,8 +43,11 @@
     if (!chat.name) {
       chat.name = original
       return
+    } else {
+      chat.lastUse = Date.now()
+      // only sync if the name changed
+      saveChatStore(chat.name !== original)
     }
-    saveChatStore()
   }
 
   const delChat = () => {

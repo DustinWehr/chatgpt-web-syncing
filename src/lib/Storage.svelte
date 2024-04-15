@@ -7,12 +7,17 @@
   import { getProfile, getProfiles, isStaticProfile, newNameForProfile, restartProfile } from './Profiles.svelte'
   import { errorNotice } from './Util.svelte'
   import { clearAllImages, deleteImage, setImage } from './ImageStore.svelte'
+  import { maybeLoadSyncFeature, maybeAutosync } from './sync/SyncFeatureAPI.svelte';
+  import { LS_DELETED_CHAT_SYNC_IDS_KEY } from './sync/SyncConstants.svelte';
 
   // TODO: move chatsStorage to indexedDB with localStorage as a fallback for private browsing.
   //       Enough long chats will overflow localStorage.
+  export const deletedChatSyncIdsStorage = persisted(LS_DELETED_CHAT_SYNC_IDS_KEY, [] as string[])
   export const chatsStorage = persisted('chats', [] as Chat[])
   export const latestModelMap = persisted('latestModelMap', {} as Record<Model, Model>) // What was returned when a model was requested
-  export const globalStorage = persisted('global', {} as GlobalSettings)
+  //dw: why wasn't globalDefaults used here before?
+  // export const globalStorage = persisted('global', {} as GlobalSettings)
+  export const globalStorage = persisted('global', globalDefaults)
   export const apiKeyStorage = persisted('apiKey', '' as string)
   export let checkStateChange = writable(0) // Trigger for Chat
   export let showSetChatSettings = writable(false) //
@@ -36,6 +41,7 @@
     return chatId
   }
 
+  // ======================================
   export const addChat = (profile:ChatSettings|undefined = undefined): number => {
     const chats = get(chatsStorage)
 
@@ -58,10 +64,42 @@
       lastUse: Date.now(),
       lastAccess: Date.now()
     })
+    if (getGlobalSettings().enableSyncFeature) {
+      chats[chats.length-1].syncId = uuidv4()
+    }
     chatsStorage.set(chats)
+    maybeAutosync()
     // Apply defaults and prepare it to start
     restartProfile(chatId)
     return chatId
+  }
+  
+  export const haveChat = (chatId: number): boolean => {
+    const chats = get(chatsStorage)
+    return chats.find((chat) => chat.id === chatId) !== undefined
+  }
+
+  // This is very similar to addChatFromJson, except
+  // - the Chat is already parsed
+  // - chat.chatId is kept if it's not already used locally
+  // - chat.created is kept
+  export const addChatFromChat = async (chat: Chat): Promise<number> => {
+    const chats = get(chatsStorage)
+
+    if (haveChat(chat.id)) {
+      chat.id = newChatID()
+    }
+
+    // Make sure images are moved to indexedDB store,
+    // else they would clobber local storage
+    await updateChatImages(chat.id, chat)
+
+    // Add a new chat
+    chats.push(chat)
+    chatsStorage.set(chats)
+    // make sure it's up-to-date
+    updateChatSettings(chat.id) // incrementChangeVersion() called in here
+    return chat.id
   }
 
   export const addChatFromJSON = async (json: string): Promise<number> => {
@@ -93,7 +131,7 @@
     chats.push(chat)
     chatsStorage.set(chats)
     // make sure it's up-to-date
-    updateChatSettings(chatId)
+    updateChatSettings(chatId) // maybeAutosync() called in here
     return chatId
   }
 
@@ -122,6 +160,7 @@
     if (chat.startSession === undefined) chat.startSession = false
     if (chat.sessionStarted === undefined) chat.sessionStarted = !!chat.messages.find(m => m.role === 'user')
     chatsStorage.set(chats)
+    // don't sync here, because this function gets called too much
   }
 
   // Make sure profile options are set with current values or defaults
@@ -167,15 +206,22 @@
       chat.settings[k] = v
     })
     chatsStorage.set(chats)
+    maybeAutosync()
   }
 
   export const clearChats = () => {
     chatsStorage.set([])
     clearAllImages()
+    maybeAutosync()
   }
-  export const saveChatStore = () => {
+  export const saveChatStore = (dosync=false) => {
     const chats = get(chatsStorage)
     chatsStorage.set(chats)
+    if (dosync) {
+      // only sync when specified at call site, because this function gets called too much,
+      // including to update Chat.lastAccess every time a chat is viewed.
+      maybeAutosync() 
+    }
   }
 
   export const getChat = (chatId: number):Chat => {
@@ -204,6 +250,7 @@
     total.prompt_tokens += usage?.prompt_tokens || 0
     total.total_tokens += usage?.total_tokens || 0
     chatsStorage.set(chats)
+    maybeAutosync()
   }
 
   export const subtractRunningTotal = (chatId: number, usage: Usage, model:Model) => {
@@ -222,6 +269,7 @@
     total.prompt_tokens -= usage?.prompt_tokens || 0
     total.total_tokens -= usage?.total_tokens || 0
     chatsStorage.set(chats)
+    maybeAutosync()
   }
 
   export const getMessages = (chatId: number): Message[] => {
@@ -372,8 +420,15 @@
 
   export const deleteChat = (chatId: number) => {
     const chats = get(chatsStorage)
+    const chat = getChat(chatId)
+    if (chat && chat.syncId && getGlobalSettings().enableSyncFeature) {
+      const deletedChats = get(deletedChatSyncIdsStorage)
+      deletedChats.push(chat.syncId)
+      deletedChatSyncIdsStorage.set(deletedChats)
+    }
     clearImages(chatId, getMessages(chatId) || [])
     chatsStorage.set(chats.filter((chat) => chat.id !== chatId))
+    maybeAutosync()
   }
 
   export const updateChatImages = async (chatId: number, chat: Chat) => {
@@ -404,6 +459,7 @@
   
     // chatsStorage
     chatsStorage.set(chats)
+    maybeAutosync()
   }
 
   export const cleanSettingValue = (type:string, value: any) => {
@@ -446,6 +502,7 @@
     }
     settings[setting.key] = cleanSettingValue(setting.type, value)
     chatsStorage.set(chats)
+    maybeAutosync()
   }
 
   export const getChatSettingValueNullDefault = (chatId: number, setting: ChatSetting):any => {
@@ -580,5 +637,6 @@
     modelMapStore[requestedModel] = responseModel
     latestModelMap.set(modelMapStore)
   }
-  
+
+  maybeLoadSyncFeature()
 </script>

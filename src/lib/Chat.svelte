@@ -11,7 +11,11 @@
     getMessage,
     currentChatMessages,
     setCurrentChat,
-    currentChatId
+    currentChatId,    
+    getGlobalSettings
+
+
+
   } from './Storage.svelte'
   import {
     type Message,
@@ -230,6 +234,10 @@
         // Compose the input message
         const inputMessage: Message = { role: 'user', content: input.value, uuid: uuidv4() }
         addMessage(chatId, inputMessage)
+        if (getGlobalSettings().autoSummarize && $currentChatMessages.length == 2) {
+          // auto suggest name
+          suggestName()
+        }
       } else if (!fillMessage && $currentChatMessages.length &&
         $currentChatMessages[$currentChatMessages.length - 1].role === 'assistant') {
         fillMessage = $currentChatMessages[$currentChatMessages.length - 1]

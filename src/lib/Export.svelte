@@ -28,6 +28,18 @@
     document.body.removeChild(a)
   }
 
+  export const exportAllChatsAsJSON = async () => {
+    const exportContent = localStorage.chats
+    const blob = new Blob([exportContent], { type: 'text/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.download = "allchats.json"
+    a.href = url
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }
+
   export const exportChatAsJSON = async (chatId: number) => {
     const chat = JSON.parse(JSON.stringify(getChat(chatId))) as Chat
     for (let i = 0; i < chat.messages.length; i++) {

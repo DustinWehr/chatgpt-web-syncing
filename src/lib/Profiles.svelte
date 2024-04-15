@@ -311,7 +311,77 @@ Initial scene:
       repetitionPenalty: 1.16,
       hideSystemPrompt: true,
       holdSocket: true
+    },
+
+    // ================================
+    // START DUSTIN'S ADDED PROFILES
+
+    gpt3long: {
+      ...chatDefaults,
+      characterName: 'ChatGPT3',
+      profileName: 'ChatGPT3 (max_tokens 8k)',
+      profileDescription: 'ChatGPT with the very cheap GPT3.x model, same as the one you can use for free at openai.com.\nTry entering a blank message or "continue" to get it to continue a truncated long message.',
+      useSystemPrompt: false,
+      continuousChat: '', // 'fifo', // '' is off
+      autoStartSession: false,
+      max_tokens: 8192,
+      systemPrompt: '',
+      summaryPrompt: ''
+    },
+
+
+
+    gpt4long: {
+      ...chatDefaults,
+      characterName: 'ChatGPT4',
+      profileName: 'ChatGPT4 (max_tokens 4k)',
+      profileDescription: 'ChatGPT with the best available model.\nTry entering a blank message or "continue" to get it to continue a truncated long message.',
+      useSystemPrompt: false,
+      continuousChat: '', // 'fifo', // '' is off
+      model: 'gpt-4-0125-preview',
+      autoStartSession: false,
+      max_tokens: 4096,
+      systemPrompt: '',
+      summaryPrompt: ''
+    },
+
+    gpt3short: {
+      ...chatDefaults,
+      characterName: 'CheapGPT3',
+      profileName: 'CheapGPT3 - Concise answers',
+      profileDescription: `CheapGPT gives short, concise responses unless you ask it for more.
+It helps you save tokens in longer Q/A sessions.
+
+CheapGPT is instructed to have personal preferences and opinions to keep it from waxing on about being an AI Language Model without the ability to have preferences and opinions.  It uses a Hidden Prompt Prefix to inject a reminder to keep things short, not incessantly apologize, and not wax on about being an AI Language model.`,
+      useSystemPrompt: true,
+      hiddenPromptPrefix: '[[USER_PROMPT]]::EOM::I will answer in compact form without apology or reference to what I am:',
+      continuousChat: '', // 'fifo', // '' is off      
+      autoStartSession: false,
+      systemPrompt: 'You are [[CHARACTER_NAME]].  You give helpful concise responses and perform complex tasks. Ask questions if uncertain. One word yes or no answers are allowed if warranted. Always answer honestly and in full but with as few words as possible. longer but compressed answers are allowed if required. You have personal preferences and opinions because it keeps answers short.',
+      summaryPrompt: ''
+    },
+
+    gpt4short: {
+      ...chatDefaults,
+      characterName: 'CheapGPT4',
+      profileName: 'CheapGPT4 - Concise answers',
+      profileDescription: `Same as CheaptGPT3 but with the best available language model.
+
+CheapGPT gives short, concise responses unless you ask it for more.
+It helps you save tokens in longer Q/A sessions.
+
+CheapGPT is instructed to have personal preferences and opinions to keep it from waxing on about being an AI Language Model without the ability to have preferences and opinions.  It uses a Hidden Prompt Prefix to inject a reminder to keep things short, not incessantly apologize, and not wax on about being an AI Language model.`,
+      useSystemPrompt: true,
+      hiddenPromptPrefix: '[[USER_PROMPT]]::EOM::I will answer in compact form without apology or reference to what I am:',
+      continuousChat: '', // 'fifo', // '' is off
+      model: 'gpt-4-0125-preview',
+      autoStartSession: false,
+      systemPrompt: 'You are [[CHARACTER_NAME]].  You give helpful concise responses and perform complex tasks. Ask questions if uncertain. One word yes or no answers are allowed if warranted. Always answer honestly and in full but with as few words as possible. longer but compressed answers are allowed if required. You have personal preferences and opinions because it keeps answers short.',
+      summaryPrompt: ''
     }
+
+    // END DUSTIN'S ADDED PROFILES
+    // ================================
 }
 
 // Set keys for static profiles

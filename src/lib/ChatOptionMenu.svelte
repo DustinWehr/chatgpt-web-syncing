@@ -19,17 +19,28 @@
   } from '@fortawesome/free-solid-svg-icons/index'
   import { faSquareMinus, faSquarePlus as faSquarePlusOutline } from '@fortawesome/free-regular-svg-icons/index'
   import { addChatFromJSON, chatsStorage, checkStateChange, clearChats, clearMessages, copyChat, globalStorage, setGlobalSettingValueByKey, showSetChatSettings, pinMainMenu, getChat, deleteChat, saveChatStore, saveCustomProfile } from './Storage.svelte'
-  import { exportAsMarkdown, exportChatAsJSON } from './Export.svelte'
+  import { exportAsMarkdown, exportChatAsJSON, exportAllChatsAsJSON } from './Export.svelte'
   import { newNameForProfile, restartProfile } from './Profiles.svelte'
   import { replace } from 'svelte-spa-router'
   import { clickOutside } from 'svelte-use-click-outside'
   import { openModal } from 'svelte-modals'
   import PromptConfirm from './PromptConfirm.svelte'
   import { startNewChatWithWarning, startNewChatFromChatId, errorNotice, encodeHTMLEntities } from './Util.svelte'
-  import type { ChatSettings } from './Types.svelte'
+  import type { Chat, ChatSettings } from './Types.svelte'
   import { hasActiveModels } from './Models.svelte'
+  import { get as getStore } from 'svelte/store'
+  import { newChatID, updateChatSettings } from './Storage.svelte'
 
-  export let chatId
+  import {enc, SHA1} from 'crypto-js';
+
+  function hashIt(s: string): string {
+      const wordArray = enc.Utf8.parse(s);
+      return SHA1(wordArray).toString();
+  }
+
+
+
+  export let chatId : number
   export const show = (showHide:boolean = true) => {
     showChatMenu = showHide
   }
@@ -39,6 +50,7 @@
 
   let showChatMenu = false
   let chatFileInput
+  let manyChatsFileInput
   let profileFileInput
 
   const importChatFromFile = (e) => {
@@ -50,6 +62,60 @@
     reader.onload = e => {
       const json = (e.target || {}).result as string
       addChatFromJSON(json)
+    }
+  }
+
+  const importManyChatsFromFile = async (e) => {
+    close()
+    const chatsStore = getStore(chatsStorage)
+
+    const existingHashes = new Set()
+
+    chatsStore.forEach( (chat, index) => {
+      const msgs_string = JSON.stringify(chat.messages);
+      existingHashes.add(hashIt(msgs_string));
+    })
+
+    function chatExists(chat:Chat) {
+      const msgs_string = JSON.stringify(chat.messages);
+      return existingHashes.has(hashIt(msgs_string));
+    }
+
+    const image = e.target.files[0]
+    e.target.value = null
+    const reader = new FileReader()
+    let not_skipped = 0
+    let skipped = 0
+    reader.readAsText(image)
+    reader.onload = e => {
+      const json = (e.target || {}).result as string
+      const chats = JSON.parse(json) as Chat[]
+      for (let chat of chats) {
+        if (!chat.settings || !chat.messages || isNaN(chat.id)) {
+          errorNotice('Not valid Chat JSON')
+          return 0
+        }
+
+        if (chatExists(chat)) {
+          // console.log("Skipping import of chat with messages same as an existing chat.")
+          skipped += 1
+          continue
+        }
+        not_skipped += 1
+
+        const chatId = newChatID()
+
+        chat.id = chatId
+        // dw: note addChatFromJSON overwrites the date in the equivalent place,
+        // with chat.created = Date.now(). not sure why.
+        chatsStore.push(chat)
+
+        // dw: I'm not sure about this (also in addChatFromJSON). Might be an old-to-new version hack.
+        // updateChatSettings(chat.id)
+      }
+      console.log(`${not_skipped} chats imported. ${skipped} chats skipped.`)
+
+      chatsStorage.set(chatsStore)
     }
   }
 
@@ -147,7 +213,7 @@
           },
           onCancel: () => {}
         })
-      } catch (e) {
+      } catch (e:any) {
         errorNotice('Unable to import profile:', e)
       }
     }
@@ -194,6 +260,13 @@
         <span class="menu-icon"><Fa icon={faSquareMinus}/></span> Clear Chat Usage
       </a>
       <hr class="dropdown-divider">
+      <a href={'#'} class="dropdown-item" on:click|preventDefault={() => { close(); exportAllChatsAsJSON() }}>
+        <span class="menu-icon"><Fa icon={faDownload}/></span> Backup all chats JSON
+      </a>
+      <a href={'#'} class="dropdown-item" on:click|preventDefault={() => { if (chatId) close(); manyChatsFileInput.click() }}>
+        <span class="menu-icon"><Fa icon={faUpload}/></span> Restore many chats JSON
+      </a>
+
       <a href={'#'} class="dropdown-item" class:is-disabled={!chatId} on:click|preventDefault={() => { close(); exportChatAsJSON(chatId) }}>
         <span class="menu-icon"><Fa icon={faDownload}/></span> Backup Chat JSON
       </a>
@@ -209,10 +282,10 @@
       </a>
       <hr class="dropdown-divider">
       <a href={'#'} class="dropdown-item" class:is-disabled={!chatId} on:click|preventDefault={() => { if (chatId) close(); delChat() }}>
-        <span class="menu-icon"><Fa icon={faTrash}/></span> Delete Chat
+        <span class="menu-icon"><Fa icon={faTrash}/></span> Delete Chat {#if $globalStorage.enableSyncFeature} (synced){/if}
       </a>
       <a href={'#'} class="dropdown-item" class:is-disabled={$chatsStorage && !$chatsStorage[0]} on:click|preventDefault={() => { confirmClearChats() }}>
-        <span class="menu-icon"><Fa icon={faTrashCan}/></span> Delete ALL Chats
+        <span class="menu-icon"><Fa icon={faTrashCan}/></span> Delete ALL Chats {#if $globalStorage.enableSyncFeature}(not synced){/if}
       </a>
       <hr class="dropdown-divider">
       <a href={'#'} class="dropdown-item" on:click|preventDefault={() => { if (chatId) toggleHideSummarized() }}>
@@ -230,5 +303,6 @@
   </div>
 </div>
 
+<input style="display:none" type="file" accept=".json" on:change={(e) => importManyChatsFromFile(e)} bind:this={manyChatsFileInput} >
 <input style="display:none" type="file" accept=".json" on:change={(e) => importChatFromFile(e)} bind:this={chatFileInput} >
 <input style="display:none" type="file" accept=".json" on:change={(e) => importProfileFromFile(e)} bind:this={profileFileInput} >

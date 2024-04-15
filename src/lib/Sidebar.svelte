@@ -1,15 +1,18 @@
 <script lang="ts">
   import { params } from 'svelte-spa-router'
   import ChatMenuItem from './ChatMenuItem.svelte'
-  import { chatsStorage, pinMainMenu, checkStateChange, getChatSortOption, setChatSortOption } from './Storage.svelte'
+  import { chatsStorage, pinMainMenu, checkStateChange, getChatSortOption, setChatSortOption, globalStorage } from './Storage.svelte'
   import Fa from 'svelte-fa/src/fa.svelte'
-  import { faSquarePlus, faKey } from '@fortawesome/free-solid-svg-icons/index'
+  import { faSquarePlus, faKey, faSync } from '@fortawesome/free-solid-svg-icons/index'
   import ChatOptionMenu from './ChatOptionMenu.svelte'
   import logo from '../assets/logo.svg'
   import { clickOutside } from 'svelte-use-click-outside'
   import { startNewChatWithWarning } from './Util.svelte'
   import { chatSortOptions } from './Settings.svelte'
   import { hasActiveModels } from './Models.svelte'
+  import { getProfile } from './Profiles.svelte'
+  import { maybeSync } from './sync/SyncFeatureAPI.svelte';
+
 
   $: sortedChats = $chatsStorage.sort(getChatSortOption().sortFn)
   $: activeChatId = $params && $params.chatId ? parseInt($params.chatId) : undefined
@@ -61,6 +64,13 @@
             <button class="button" aria-haspopup="true" aria-controls="dropdown-menu3" on:click|preventDefault|stopPropagation={() => { showSortMenu = !showSortMenu }}>
               <span class="icon"><Fa icon={sortOption.icon}/></span>
             </button>
+
+            {#if $globalStorage.enableSyncFeature}
+              <button class="button"
+                on:click|preventDefault={maybeSync}>
+                <span class="icon "><Fa icon={faSync}/></span>
+              </button>
+            {/if}
           </div>
           <div class="dropdown-menu" id="dropdown-menu3" role="menu">
             <div class="dropdown-content">
@@ -81,10 +91,55 @@
             ><span class="greyscale mr-1"><Fa icon={faKey} /></span> API Setting</a
           ></div>
         {:else}
+        {#if $globalStorage.multipleNewChatButtons}
+        <div>
+          <div class="level-item">
+            <button on:click={() => { $pinMainMenu = false;
+            startNewChatWithWarning(
+                activeChatId,
+                getProfile("gpt3short")  // this is its key in Profiles.svelte
+            )}}
+            class="panel-block button" title="Cheap GPT3.5" class:is-disabled={!hasModels}
+              ><span class="greyscale mr-1"><Fa icon={faSquarePlus} /></span> S3</button>
+          </div>
+
+          <div class="level-item">
+            <button on:click={() => { $pinMainMenu = false;
+            startNewChatWithWarning(
+                activeChatId,
+                getProfile("gpt3long")  // this is its key in Profiles.svelte
+            )}}
+            class="panel-block button" title="GPT3.5" class:is-disabled={!hasModels}
+              ><span class="greyscale mr-1"><Fa icon={faSquarePlus} /></span> L3</button>
+          </div>
+        </div>
+        <div>
+          <div class="level-item">
+            <button on:click={() => { $pinMainMenu = false;
+            startNewChatWithWarning(
+                activeChatId,
+                getProfile("gpt4short")  // this is its key in Profiles.svelte
+            )}}
+            class="panel-block button" title="Cheap GPT4" class:is-disabled={!hasModels}
+              ><span class="greyscale mr-1"><Fa icon={faSquarePlus} /></span> S4</button>
+          </div>
+
+          <div class="level-item">
+            <button on:click={() => { $pinMainMenu = false;
+            startNewChatWithWarning(
+                activeChatId,
+                getProfile("gpt4long")  // this is its key in Profiles.svelte
+            )}}
+            class="panel-block button" title="GPT4" class:is-disabled={!hasModels}
+              ><span class="greyscale mr-1"><Fa icon={faSquarePlus} /></span> L4</button>
+          </div>
+        </div>
+        {:else}
         <div class="level-item">
           <button on:click={() => { $pinMainMenu = false; startNewChatWithWarning(activeChatId) }} class="panel-block button" title="Start new chat with default profile" class:is-disabled={!hasModels}
             ><span class="greyscale mr-1"><Fa icon={faSquarePlus} /></span> New chat</button>
           </div>
+        {/if}
         {/if}
       </div>
     </div>

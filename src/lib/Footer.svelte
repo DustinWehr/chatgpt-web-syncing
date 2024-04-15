@@ -23,5 +23,6 @@ export { classes as class }
       <a target="_blank" class="ml-4" href="https://github.com/Niek/chatgpt-web"><span style="position:absolute" class="icon default-text"><Fa size="2x" icon="{faGithub}"/></span></a>
       <span style="display:inline-block;width:30px;height:20px;"></span>
     </p>
+    <h3><strong id='footer-progress-display'></strong></h3>
   </div>
 </div>
