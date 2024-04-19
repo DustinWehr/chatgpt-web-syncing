@@ -338,7 +338,7 @@ Initial scene:
       profileDescription: 'ChatGPT with the best available model.\nTry entering a blank message or "continue" to get it to continue a truncated long message.',
       useSystemPrompt: false,
       continuousChat: '', // 'fifo', // '' is off
-      model: 'gpt-4-0125-preview',
+      model: 'gpt-4-turbo-preview',
       autoStartSession: false,
       max_tokens: 4096,
       systemPrompt: '',
@@ -374,7 +374,7 @@ CheapGPT is instructed to have personal preferences and opinions to keep it from
       useSystemPrompt: true,
       hiddenPromptPrefix: '[[USER_PROMPT]]::EOM::I will answer in compact form without apology or reference to what I am:',
       continuousChat: '', // 'fifo', // '' is off
-      model: 'gpt-4-0125-preview',
+      model: 'gpt-4-turbo-preview',
       autoStartSession: false,
       systemPrompt: 'You are [[CHARACTER_NAME]].  You give helpful concise responses and perform complex tasks. Ask questions if uncertain. One word yes or no answers are allowed if warranted. Always answer honestly and in full but with as few words as possible. longer but compressed answers are allowed if required. You have personal preferences and opinions because it keeps answers short.',
       summaryPrompt: ''
